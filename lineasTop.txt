@@ -1,0 +1,68 @@
+en system.properties:
+java.runtime.version = 15
+
+en application-prod.properties:
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQL92Dialect
+spring.datasource.driverClassName=org.postgresql.Driver
+
+y en application-local.properties:
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+dependencia de PostgreSQL:
+<dependency>
+	<groupId>org.postgresql</groupId>
+	<artifactId>postgresql</artifactId>
+</dependency>
+
+conectar la app de heroku con en proyecto en local:
+heroku git:remote -a heroku-demo-backend
+
+application properties en produccion para heroku:
+heroku config:set SPRING_PROFILES_ACTIVE=prod
+
+en server.js:
+
+//Install express server
+const express = require('express');
+const path = require('path');
+
+const app = express();
+
+// Serve only the static files form the dist directory
+app.use(express.static('./dist/pokemon'));
+
+app.get('/*', (req, res) =>
+    res.sendFile('index.html', {root: 'dist/angular-app-heroku/'}),
+);
+
+// Start the app by listening on the default Heroku port
+app.listen(process.env.PORT || 8080);
+
+
+en package.json, en dependecies, añade:
+    "express": "^4.17.1",
+    "path": "^0.12.7",
+a parte de copiar cli, compiler-cli y typescript
+tambien añade engines:
+
+  "engines": {
+    "node": "14.15.5",
+    "npm": "6.14.11"
+  }
+
+y en scripts:
+"start": "node server.js",
+"heroku-postbuild": "ng build --prod"
+
+para microservicios:
+en todas las application properties:
+server.port = ${PORT:puertoEnLocalElQueSea}
+
+en la application properties del edge y de los microservicios:
+eureka.client.serviceURL.defaultZone = https://petture-eureka.herokuapp.com/eureka/
+
+y en las application-local de los microservicios añade:
+app.url = http://localhost:puertoDelEdge
+
+y la configuración de feign client:
+@FeignClient(name = "nombreDelMicroservicio", url = "urlDelMicroservicioEnHeroku")
